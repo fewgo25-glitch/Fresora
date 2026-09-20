@@ -108,17 +108,48 @@
 
 <script>
 // Real location-enabled dataset with geographic coordinates (lat, lon)
-const items = [
-  {id:1, name:"Surprise Bakery Box", shop:"Crust & Crumb", cat:"Bakery", area:"Lal Chowk", lat:34.0733, lng:74.8093, emoji:"🥐", price:99, old:220, qty:6},
-  {id:2, name:"Veg Meal Box", shop:"Green Bowl", cat:"Meals", area:"Rajbagh", lat:34.0682, lng:74.8231, emoji:"🍱", price:129, old:240, qty:8},
-  {id:3, name:"Cafe Closing Box", shop:"Bean Street", cat:"Café", area:"Soura", lat:34.1378, lng:74.8010, emoji:"☕", price:89, old:180, qty:5},
-  {id:4, name:"Fresh Produce Box", shop:"Daily Harvest", cat:"Grocery", area:"Srinagar Central", lat:34.0837, lng:74.7973, emoji:"🥬", price:149, old:280, qty:4},
-  {id:5, name:"Pastry Mix Box", shop:"Bake House", cat:"Bakery", area:"Nishat", lat:34.1226, lng:74.8797, emoji:"🍰", price:119, old:260, qty:3},
-  {id:6, name:"Dinner Saver Box", shop:"Spice Route", cat:"Meals", area:"Hyderpora", lat:34.0381, lng:74.7892, emoji:"🍛", price:159, old:300, qty:7}
-];
-
+// --- STEP 4 CODE BEGINS HERE ---
+let items = [];
 let cat = "All", cart = [], userLocation = null;
 
+// 1. Fetch initial listings directly from your Supabase table
+async function fetchListings() {
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*');
+
+  if (error) {
+    console.error("Error fetching listings from Supabase:", error.message);
+  } else {
+    items = data;
+    recalculateAndRender();
+  }
+}
+
+// 2. Set up a live subscription to detect changes in the database
+supabase
+  .channel('public:listings')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, payload => {
+    // Whenever an item is added, updated, or deleted, fetch the latest list
+    fetchListings();
+  })
+  .subscribe();
+
+// 3. Compute live distances (if user shared location) and render cards
+function recalculateAndRender() {
+  if (userLocation) {
+    items.forEach(item => {
+      item.distance = calculateDistance(userLocation.lat, userLocation.lng, item.lat, item.lng);
+    });
+    // Sort items nearest to furthest
+    items.sort((a, b) => a.distance - b.distance);
+  }
+  render();
+}
+
+// 4. Trigger initial data fetch when page loads
+fetchListings();
+// --- STEP 4 CODE ENDS HERE ---
 // Haversine formula to compute physical distance between coordinates in km
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
