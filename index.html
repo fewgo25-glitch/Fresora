@@ -115,15 +115,8 @@
     }
   </style>
 
-  <!-- SUPABASE JS CLIENT -->
+  <!-- SUPABASE JS CLIENT (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // Replace credentials with actual details from Supabase Dashboard -> Project Settings -> API
-    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  </script>
 </head>
 <body>
 
@@ -300,10 +293,18 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    let items = [];
-    let cat = "All", cart = [], userLocation = null;
+    // 1. Supabase Initialization (Replace credentials here)
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Calculate distance in km using Haversine formula
+    // 2. Global State Variables
+    let items = [];
+    let cat = "All";
+    let cart = [];
+    let userLocation = null;
+
+    // Haversine Distance Calculation
     function calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -315,9 +316,9 @@
       return parseFloat((R * c).toFixed(1));
     }
 
-    // Fetch initial data from Supabase
+    // Fetch initial listings from Supabase
     async function fetchListings() {
-      const { data, error } = await supabase.from('listings').select('*');
+      const { data, error } = await supabaseClient.from('listings').select('*');
       if (error) {
         console.error("Error fetching listings:", error);
       } else {
@@ -326,15 +327,15 @@
       }
     }
 
-    // Live database listener
-    supabase
+    // Realtime Listener
+    supabaseClient
       .channel('public:listings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => {
         fetchListings();
       })
       .subscribe();
 
-    // Geolocation function
+    // Geolocation
     function locate() {
       if (!navigator.geolocation) {
         toast("Geolocation is not supported by your browser.");
@@ -388,7 +389,7 @@
             </div>
             <div class="price">
               <span><strong>₹${x.price}</strong><span class="old">₹${x.old}</span></span>
-              <button class="btn btn-primary" onclick="add(${x.id})" ${x.qty === 0 ? 'disabled style="opacity:0.5"' : ''}>
+              <button class="btn btn-primary" onclick="add('${x.id}')" ${x.qty === 0 ? 'disabled style="opacity:0.5"' : ''}>
                 ${x.qty === 0 ? 'Sold Out' : 'Add'}
               </button>
             </div>
@@ -398,9 +399,9 @@
     }
 
     function add(id){
-      let x = items.find(i => i.id === id);
+      let x = items.find(i => i.id == id);
       if (!x || x.qty <= 0) return;
-      let c = cart.find(i => i.id === id);
+      let c = cart.find(i => i.id == id);
       if(c) c.n++; else cart.push({id, n: 1});
       x.qty--;
       document.getElementById("cartCount").textContent = cart.reduce((a,b) => a + b.n, 0);
@@ -414,9 +415,9 @@
         body.innerHTML = "<p>Your cart is empty. Add a surplus box to get started.</p>";
         return showModal("Your Fresora cart");
       }
-      let total = cart.reduce((s, c) => s + items.find(i => i.id === c.id).price * c.n, 0);
+      let total = cart.reduce((s, c) => s + items.find(i => i.id == c.id).price * c.n, 0);
       body.innerHTML = cart.map(c => {
-        let x = items.find(i => i.id === c.id);
+        let x = items.find(i => i.id == c.id);
         return `<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee">
           <span>${x.emoji || '🍱'} <b>${x.name}</b><br><small>${x.shop} · ×${c.n}</small></span>
           <b>₹${x.price * c.n}</b>
@@ -448,7 +449,7 @@
       toast("Capturing business location...");
 
       navigator.geolocation.getCurrentPosition(async (position) => {
-        const { error } = await supabase.from('listings').insert([
+        const { error } = await supabaseClient.from('listings').insert([
           {
             name: name + " Surplus Box",
             shop: name,
@@ -476,6 +477,7 @@
     function closeModal(){ document.getElementById("modal").classList.remove("show"); }
     function toast(t){ let e = document.getElementById("toast"); e.textContent = t; e.classList.add("show"); setTimeout(() => e.classList.remove("show"), 2500); }
 
+    // Initial Fetch
     fetchListings();
   </script>
 </body>
