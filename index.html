@@ -269,7 +269,54 @@ function checkout(){
 function showModal(t){document.getElementById("modalTitle").textContent = t; document.getElementById("modal").classList.add("show")}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function toast(t){let e = document.getElementById("toast"); e.textContent = t; e.classList.add("show"); setTimeout(() => e.classList.remove("show"), 2500)}
-function partner(e){e.preventDefault(); e.target.reset(); toast("Thanks! Your partnership request was received.")}
+// --- STEP 5 CODE BEGINS HERE ---
+async function partner(e) {
+  e.preventDefault(); // Prevents the browser from reloading the page on submit
+  const form = e.target;
+  
+  // Read the inputs filled by the restaurant
+  const name = form.querySelector('input[placeholder="Green Leaf Café"]').value;
+  const type = form.querySelector('select').value;
+
+  // Check if browser supports Geolocation
+  if (!navigator.geolocation) {
+    toast("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  toast("Capturing business location...");
+
+  // Get the restaurant's live GPS coordinates
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    
+    // Insert new row directly into your Supabase database
+    const { data, error } = await supabase.from('listings').insert([
+      {
+        name: name + " Surplus Box",
+        shop: name,
+        cat: type === "Bakery" ? "Bakery" : type === "Café" ? "Café" : "Meals",
+        area: "Live Partner Location",
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        emoji: type === "Bakery" ? "🥐" : type === "Café" ? "☕" : "🍱",
+        price: 99,
+        old: 200,
+        qty: 5
+      }
+    ]);
+
+    if (error) {
+      toast("Error saving location: " + error.message);
+    } else {
+      toast("Restaurant & live location registered in Supabase!");
+      form.reset(); // Clear the form fields
+    }
+
+  }, (err) => {
+    toast("Location access denied. Please allow location access to submit.");
+  }, { enableHighAccuracy: true });
+}
+// --- STEP 5 CODE ENDS HERE ---
 
 render();
 </script>
