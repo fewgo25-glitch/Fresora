@@ -1,0 +1,7 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Fresora QR Generator</title>
+<style>body{font-family:system-ui;max-width:650px;margin:60px auto;padding:20px;background:#fffaf0;color:#173f2b}input,button{padding:13px;border-radius:10px;border:1px solid #ccd9cf;font:inherit}input{width:100%;margin:10px 0}button{background:#173f2b;color:white;font-weight:800;cursor:pointer}#out{margin-top:25px;text-align:center}img{max-width:280px}</style></head>
+<body><h1>Fresora QR Generator</h1><p>Paste your deployed Fresora website URL. The QR will open that website when scanned.</p>
+<input id="url" placeholder="https://yourname.github.io/fresora/"><button onclick="make()">Generate QR</button><div id="out"></div>
+<script>
+function make(){const u=document.getElementById('url').value.trim();if(!/^https?:\/\//.test(u))return alert('Enter a full public URL starting with https://');document.getElementById('out').innerHTML='<p>Scan this QR:</p><img alt="QR code" src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data='+encodeURIComponent(u)+'"><p>'+u+'</p>'}
+</script></body></html>
