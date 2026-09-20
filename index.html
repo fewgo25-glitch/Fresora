@@ -38,6 +38,33 @@
     @media(max-width:850px){.hero-grid,.business-grid,.impact{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:repeat(2,1fr)}.navlinks{display:none}}
     @media(max-width:560px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.hero{padding-top:45px}h1{font-size:3rem}.stats{grid-template-columns:1fr}.food-art{height:230px}.section-head{display:block}}
   </style>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fresora — Good Food Should Never Go to Waste</title>
+
+  <!-- EXISTING STYLES ARE HERE -->
+  <style>
+    /* ... your CSS styles ... */
+  </style>
+
+  <!-- ========================================== -->
+  <!-- PASTE STEP 3 CODE HERE (BEFORE </head>)   -->
+  <!-- ========================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // Replace these placeholder strings with your actual Supabase credentials
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
+
+    // Creates the live database client object
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+  <!-- ========================================== -->
+
 </head>
 <body>
 <header><div class="container"><nav>
