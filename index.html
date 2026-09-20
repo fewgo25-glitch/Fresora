@@ -27,6 +27,7 @@
     .filter{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-weight:700}.filter.active{background:var(--green);color:#fff;border-color:var(--green)}
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 8px 25px rgba(32,55,42,.05)}.thumb{height:160px;display:grid;place-items:center;font-size:4.3rem;background:var(--mint)}
     .card-body{padding:18px}.pill{display:inline-block;background:#f2eee2;color:#6a5a3c;padding:5px 9px;border-radius:999px;font-size:.75rem;font-weight:800}.card h3{margin:10px 0 5px}.meta{color:var(--muted);font-size:.9rem}.price{display:flex;align-items:center;justify-content:space-between;margin-top:15px}.price strong{font-size:1.25rem;color:var(--green)}.old{text-decoration:line-through;color:#9aa49e;font-size:.9rem;margin-left:5px}
+    .dist-tag{display:inline-block;background:#e2f2e6;color:var(--green2);padding:2px 8px;border-radius:6px;font-weight:700;font-size:.8rem;margin-left:6px}
     .how{background:#eef7f0}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.step{background:#fff;border-radius:18px;padding:22px;border:1px solid #dbe9df}.num{width:34px;height:34px;border-radius:10px;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:900}.step h3{margin-bottom:8px}.step p{color:var(--muted);line-height:1.55}
     .impact{display:grid;grid-template-columns:1fr 1fr;gap:25px}.impact-box{padding:28px;border-radius:22px;background:#fff;border:1px solid var(--line)}.impact-box h3{color:var(--green)}.bars{display:grid;gap:14px}.bar label{display:flex;justify-content:space-between;font-weight:750;margin-bottom:6px}.track{height:10px;background:#e8eee9;border-radius:20px;overflow:hidden}.fill{height:100%;background:var(--green2);border-radius:20px}
     .business{background:var(--green);color:#fff}.business .section-head h2,.business .section-head p{color:#fff}.business .section-head p{opacity:.75}.business-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}.business ul{padding-left:20px;line-height:2}.form{background:#fff;color:var(--ink);padding:25px;border-radius:20px}.form input,.form textarea,.form select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;margin:6px 0 12px;font:inherit}.form button{width:100%}
@@ -56,7 +57,7 @@
 </div></section>
 
 <section id="discover"><div class="container">
-  <div class="section-head"><div><h2>Surplus food near you</h2><p>Fresh listings are available for a limited pickup window.</p></div><button class="btn btn-soft" onclick="locate()">📍 Use my area</button></div>
+  <div class="section-head"><div><h2>Surplus food near you</h2><p>Fresh listings available in real time.</p></div><button class="btn btn-soft" onclick="locate()">📍 Use my location</button></div>
   <div class="filters"><input id="search" class="search" placeholder="Search bakery, café, meal, area…" oninput="render()"><button class="filter active" data-cat="All" onclick="setCat(this)">All</button><button class="filter" data-cat="Bakery" onclick="setCat(this)">🥐 Bakery</button><button class="filter" data-cat="Meals" onclick="setCat(this)">🍱 Meals</button><button class="filter" data-cat="Café" onclick="setCat(this)">☕ Café</button><button class="filter" data-cat="Grocery" onclick="setCat(this)">🛒 Grocery</button></div>
   <div id="cards" class="grid"></div>
 </div></section>
@@ -79,25 +80,140 @@
 <div id="toast" class="toast"></div>
 
 <script>
-const items=[
-{id:1,name:"Surprise Bakery Box",shop:"Crust & Crumb",cat:"Bakery",area:"Lal Chowk",emoji:"🥐",price:99,old:220,qty:6},
-{id:2,name:"Veg Meal Box",shop:"Green Bowl",cat:"Meals",area:"Rajbagh",emoji:"🍱",price:129,old:240,qty:8},
-{id:3,name:"Cafe Closing Box",shop:"Bean Street",cat:"Café",area:"Soura",emoji:"☕",price:89,old:180,qty:5},
-{id:4,name:"Fresh Produce Box",shop:"Daily Harvest",cat:"Grocery",area:"Srinagar",emoji:"🥬",price:149,old:280,qty:4},
-{id:5,name:"Pastry Mix Box",shop:"Bake House",cat:"Bakery",area:"Nishat",emoji:"🍰",price:119,old:260,qty:3},
-{id:6,name:"Dinner Saver Box",shop:"Spice Route",cat:"Meals",area:"Hyderpora",emoji:"🍛",price:159,old:300,qty:7}
+// Real location-enabled dataset with geographic coordinates (lat, lon)
+const items = [
+  {id:1, name:"Surprise Bakery Box", shop:"Crust & Crumb", cat:"Bakery", area:"Lal Chowk", lat:34.0733, lng:74.8093, emoji:"🥐", price:99, old:220, qty:6},
+  {id:2, name:"Veg Meal Box", shop:"Green Bowl", cat:"Meals", area:"Rajbagh", lat:34.0682, lng:74.8231, emoji:"🍱", price:129, old:240, qty:8},
+  {id:3, name:"Cafe Closing Box", shop:"Bean Street", cat:"Café", area:"Soura", lat:34.1378, lng:74.8010, emoji:"☕", price:89, old:180, qty:5},
+  {id:4, name:"Fresh Produce Box", shop:"Daily Harvest", cat:"Grocery", area:"Srinagar Central", lat:34.0837, lng:74.7973, emoji:"🥬", price:149, old:280, qty:4},
+  {id:5, name:"Pastry Mix Box", shop:"Bake House", cat:"Bakery", area:"Nishat", lat:34.1226, lng:74.8797, emoji:"🍰", price:119, old:260, qty:3},
+  {id:6, name:"Dinner Saver Box", shop:"Spice Route", cat:"Meals", area:"Hyderpora", lat:34.0381, lng:74.7892, emoji:"🍛", price:159, old:300, qty:7}
 ];
-let cat="All", cart=[];
-function setCat(el){document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));el.classList.add("active");cat=el.dataset.cat;render()}
-function render(){let q=document.getElementById("search").value.toLowerCase();let out=items.filter(x=>(cat==="All"||x.cat===cat)&&Object.values(x).join(" ").toLowerCase().includes(q));document.getElementById("cards").innerHTML=out.map(x=>`<article class="card"><div class="thumb">${x.emoji}</div><div class="card-body"><span class="pill">${x.cat}</span><h3>${x.name}</h3><div class="meta">${x.shop} · ${x.area}<br>Pickup today · Limited quantity</div><div class="price"><span><strong>₹${x.price}</strong><span class="old">₹${x.old}</span></span><button class="btn btn-primary" onclick="add(${x.id})">Add</button></div></div></article>`).join("")||"<p>No matching listings right now.</p>"}
-function add(id){let x=items.find(i=>i.id===id);let c=cart.find(i=>i.id===id);if(c)c.n++;else cart.push({id,n:1});document.getElementById("cartCount").textContent=cart.reduce((a,b)=>a+b.n,0);toast(x.name+" added to cart")}
-function openCart(){let body=document.getElementById("cartBody");if(!cart.length){body.innerHTML="<p>Your cart is empty. Add a surplus box to get started.</p>";return showModal("Your Fresora cart")}let total=cart.reduce((s,c)=>s+items.find(i=>i.id===c.id).price*c.n,0);body.innerHTML=cart.map(c=>{let x=items.find(i=>i.id===c.id);return `<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee"><span>${x.emoji} <b>${x.name}</b><br><small>${x.shop} · ×${c.n}</small></span><b>₹${x.price*c.n}</b></div>`}).join("")+`<div style="display:flex;justify-content:space-between;padding:18px 0;font-size:1.2rem"><b>Total</b><b>₹${total}</b></div><button class="btn btn-primary" style="width:100%" onclick="checkout()">Reserve & pay (demo)</button>`;showModal("Your Fresora cart")}
-function checkout(){cart=[];document.getElementById("cartCount").textContent="0";closeModal();toast("Reservation confirmed — this is a demo checkout.")}
-function showModal(t){document.getElementById("modalTitle").textContent=t;document.getElementById("modal").classList.add("show")}
+
+let cat = "All", cart = [], userLocation = null;
+
+// Haversine formula to compute physical distance between coordinates in km
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return parseFloat((R * c).toFixed(1));
+}
+
+// Request real user geolocation
+function locate() {
+  if (!navigator.geolocation) {
+    toast("Geolocation is not supported by your browser");
+    return;
+  }
+
+  toast("Retrieving your position...");
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      userLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      // Calculate distance for all listings
+      items.forEach(item => {
+        item.distance = calculateDistance(userLocation.lat, userLocation.lng, item.lat, item.lng);
+      });
+
+      // Sort by proximity
+      items.sort((a, b) => a.distance - b.distance);
+
+      toast("Listings sorted by nearest distance!");
+      render();
+    },
+    (error) => {
+      toast("Location access denied or unavailable.");
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+function setCat(el){
+  document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+  cat = el.dataset.cat;
+  render();
+}
+
+function render(){
+  let q = document.getElementById("search").value.toLowerCase();
+  let out = items.filter(x => (cat === "All" || x.cat === cat) && Object.values(x).join(" ").toLowerCase().includes(q));
+  
+  document.getElementById("cards").innerHTML = out.map(x => `
+    <article class="card">
+      <div class="thumb">${x.emoji}</div>
+      <div class="card-body">
+        <span class="pill">${x.cat}</span>
+        <h3>${x.name}</h3>
+        <div class="meta">
+          ${x.shop} · ${x.area} ${x.distance !== undefined ? `<span class="dist-tag">📍 ${x.distance} km</span>` : ''}<br>
+          Pickup today · <b>${x.qty} left</b>
+        </div>
+        <div class="price">
+          <span><strong>₹${x.price}</strong><span class="old">₹${x.old}</span></span>
+          <button class="btn btn-primary" onclick="add(${x.id})" ${x.qty === 0 ? 'disabled style="opacity:0.5"' : ''}>
+            ${x.qty === 0 ? 'Sold Out' : 'Add'}
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join("") || "<p>No matching listings right now.</p>";
+}
+
+function add(id){
+  let x = items.find(i => i.id === id);
+  if (x.qty <= 0) return;
+  
+  let c = cart.find(i => i.id === id);
+  if(c) c.n++; else cart.push({id, n: 1});
+  
+  x.qty--; // Live stock decrease
+  document.getElementById("cartCount").textContent = cart.reduce((a,b) => a + b.n, 0);
+  toast(x.name + " added to cart");
+  render();
+}
+
+function openCart(){
+  let body = document.getElementById("cartBody");
+  if(!cart.length){
+    body.innerHTML = "<p>Your cart is empty. Add a surplus box to get started.</p>";
+    return showModal("Your Fresora cart");
+  }
+  let total = cart.reduce((s, c) => s + items.find(i => i.id === c.id).price * c.n, 0);
+  body.innerHTML = cart.map(c => {
+    let x = items.find(i => i.id === c.id);
+    return `<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee">
+      <span>${x.emoji} <b>${x.name}</b><br><small>${x.shop} · ×${c.n}</small></span>
+      <b>₹${x.price * c.n}</b>
+    </div>`;
+  }).join("") + `<div style="display:flex;justify-content:space-between;padding:18px 0;font-size:1.2rem"><b>Total</b><b>₹${total}</b></div><button class="btn btn-primary" style="width:100%" onclick="checkout()">Reserve & pay (demo)</button>`;
+  showModal("Your Fresora cart");
+}
+
+function checkout(){
+  cart = [];
+  document.getElementById("cartCount").textContent = "0";
+  closeModal();
+  toast("Reservation confirmed — real-time booking demo!");
+}
+
+function showModal(t){document.getElementById("modalTitle").textContent = t; document.getElementById("modal").classList.add("show")}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
-function toast(t){let e=document.getElementById("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)}
-function partner(e){e.preventDefault();e.target.reset();toast("Thanks! Your partnership request was received in this demo.")}
-function locate(){toast("Demo location: showing listings around Srinagar.")}
+function toast(t){let e = document.getElementById("toast"); e.textContent = t; e.classList.add("show"); setTimeout(() => e.classList.remove("show"), 2500)}
+function partner(e){e.preventDefault(); e.target.reset(); toast("Thanks! Your partnership request was received.")}
+
 render();
 </script>
-</body></html>
+</body>
+</html>
